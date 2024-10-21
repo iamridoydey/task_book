@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://task-book-smoky.vercel.app/",
+    origin: "https://task-book-smoky.vercel.app",
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true
   })
