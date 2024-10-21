@@ -1,3 +1,4 @@
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { Request, Response } from "express";
 import { Error } from "mongoose";
 const cors = require("cors");
@@ -10,11 +11,10 @@ const PORT = 3000;
 // Load environment variables from a .env file
 dotenv.config();
 
-
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err:any) => console.log("Mongo Error", err));
+  .catch((err: any) => console.log("Mongo Error", err));
 
 // Define Todo schema with timestamps
 const todoSchema = new mongoose.Schema(
@@ -37,7 +37,7 @@ app.use(
   cors({
     origin: "https://task-book-smoky.vercel.app",
     methods: ["GET", "POST", "PATCH", "DELETE"],
-    credentials: true
+    credentials: true,
   })
 );
 
@@ -125,5 +125,7 @@ app
     }
   });
 
-// Start the server
-app.listen(PORT);
+// Export the app as a handler for Vercel
+export default (req: VercelRequest, res: VercelResponse) => {
+  app(req, res);
+};
