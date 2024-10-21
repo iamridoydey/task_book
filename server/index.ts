@@ -3,15 +3,18 @@ import { Error } from "mongoose";
 const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
+import dotenv from "dotenv";
 
 const app = express();
 const PORT = 3000;
+// Load environment variables from a .env file
+dotenv.config();
 
-// Connect MongoDB
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/todo_app")
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err: Error) => console.log("Mongo Error", err));
+  .catch((err:any) => console.log("Mongo Error", err));
 
 // Define Todo schema with timestamps
 const todoSchema = new mongoose.Schema(
@@ -30,7 +33,13 @@ const Todo = mongoose.model("Todo", todoSchema);
 // Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://task-book-smoky.vercel.app/",
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    credentials: true
+  })
+);
 
 // GET all todos
 app.get("/todos", async (req: Request, res: Response) => {
@@ -117,6 +126,4 @@ app
   });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen(PORT);
