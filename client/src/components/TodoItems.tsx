@@ -4,12 +4,13 @@ import { DataContext } from '../store/DataContext'
 
 const TodoItems:React.FC = () => {
   const {todos} = useContext(DataContext)
+  console.log(todos)
   return (
     <section
       className={`w-full flex flex-col items-center justify-between gap-2`}
     >
       {todos.map((item) => (
-        <TodoItem key={item.id} id={item.id} todo={item.todo} />
+        <TodoItem key={item._id} _id={item._id} todo={item.todo} />
       ))}
     </section>
   );

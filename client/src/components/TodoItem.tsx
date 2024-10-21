@@ -1,32 +1,32 @@
-import React, { SyntheticEvent, useContext, useState } from 'react'
-import Todo from './Todo'
+import React, { SyntheticEvent, useContext, useState } from "react";
 import { MdEdit, MdDeleteForever } from "react-icons/md";
-import { DataContext } from '../store/DataContext';
+import { DataContext } from "../store/DataContext";
+import Todo from "./Todo"; // Ensure Todo type has _id
 
-
-const TodoItem: React.FC<Todo> = ({id, todo}) => {
-  const [editValue, setEditValue] = useState(todo)
-  const {deleteItem, updateItem} = useContext(DataContext);
+const TodoItem: React.FC<Todo> = ({ _id, todo }) => {
+  const [editValue, setEditValue] = useState(todo);
+  const { deleteItem, updateItem } = useContext(DataContext);
   const [isEditable, setIsEditable] = useState(false);
 
-  const handleOnDelete=(id: number)=>{
-    deleteItem(id);
-  }
+  const handleOnDelete = (_id: string) => {
+    deleteItem(_id);
+  };
 
   const handleOnChange = (e: SyntheticEvent) => {
     const input = e.target as HTMLInputElement;
     setEditValue(input.value);
   };
 
-  const handleOnUpdate = (e: SyntheticEvent)=>{
+  const handleOnUpdate = async (e: SyntheticEvent) => {
     e.preventDefault();
 
-    if (todo !== editValue){
-      updateItem({id, todo:editValue})
+    if (todo !== editValue) {
+      updateItem({ _id, todo: editValue });
     }
 
-    setIsEditable(false)
-  }
+    setIsEditable(false);
+  };
+
   return (
     <div
       className={`w-full bg-yellow-400 p-4 rounded-md flex items-center justify-between`}
@@ -51,12 +51,12 @@ const TodoItem: React.FC<Todo> = ({id, todo}) => {
         >
           <MdEdit />
         </span>
-        <span onClick={() => handleOnDelete(id)} className={`cursor-pointer`}>
+        <span onClick={() => handleOnDelete(_id)} className={`cursor-pointer`}>
           <MdDeleteForever color="red" />
         </span>
       </div>
     </div>
   );
-}
+};
 
-export default TodoItem
+export default TodoItem;

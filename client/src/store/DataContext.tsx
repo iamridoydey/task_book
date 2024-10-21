@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useReducer } from "react";
-import Todo from "../components/Todo";
+import { createContext, ReactNode, useEffect, useReducer } from "react";
+import Todo from "../components/Todo"; // Make sure Todo has _id: string
 
 interface Action {
   type: string;
@@ -8,8 +8,8 @@ interface Action {
 
 interface contextType {
   todos: Todo[];
-  addItem: (todo: Todo) => void;
-  deleteItem: (id: number) => void;
+  addItem: (todoName: string) => void;
+  deleteItem: (id: string) => void;
   updateItem: (todo: Todo) => void;
 }
 
@@ -27,17 +27,15 @@ const reducer = (state: Todo[], action: Action) => {
     case "add":
       return [...state, action.payload];
     case "delete":
-      return state.filter((todo) => {
-        return todo.id !== action.payload;
-      });
-
+      return state.filter((todo) => todo._id !== action.payload);
     case "update":
-      return state.map((todo) => {
-        return todo.id === action.payload.id
+      return state.map((todo) =>
+        todo._id === action.payload._id
           ? { ...todo, todo: action.payload.todo }
-          : todo;
-      });
-
+          : todo
+      );
+    case "initial":
+      return action.payload;
     default:
       return state;
   }
@@ -48,17 +46,72 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [todos, dispatch] = useReducer(reducer, []);
 
-  const addItem = (todo: Todo) => {
-    dispatch({ type: "add", payload: todo });
+  const apiUrl = import.meta.env.VITE_SERVER_API_URL;;
+
+  // Fetch todos from the API
+  const fetchTodos = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/todos`);
+      const data = await response.json();
+      dispatch({ type: "initial", payload: data });
+    } catch (error) {
+      console.error("Error Fetching Initial Todos: ", error);
+    }
   };
 
-  const deleteItem = (id: number) => {
-    dispatch({ type: "delete", payload: id });
+  // Add a new todo
+  const addItem = async (todoName: string) => {
+    try {
+      const response = await fetch(`${apiUrl}/todos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ todo: todoName }), // Send only the todo name
+      });
+
+      const newTodo = await response.json(); // Get the newly created todo with the _id
+      dispatch({ type: "add", payload: newTodo });
+    } catch (error) {
+      console.error("Error adding todo: ", error);
+    }
   };
 
-  const updateItem = (todo: Todo) => {
-    dispatch({ type: "update", payload: todo });
+  // Delete a todo
+  const deleteItem = async (id: string) => {
+    try {
+      await fetch(`${apiUrl}/todos/${id}`, {
+        method: "DELETE",
+      });
+      dispatch({ type: "delete", payload: id }); // Update the state to remove the deleted todo
+    } catch (error) {
+      console.error("Error deleting todo: ", error);
+    }
   };
+
+  // Update an existing todo
+  const updateItem = async (todo: Todo) => {
+    try {
+      const response = await fetch(`${apiUrl}/todos/${todo._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ todo: todo.todo }), // Send the updated todo content
+      });
+
+      const updatedTodo = await response.json();
+      dispatch({ type: "update", payload: updatedTodo });
+    } catch (error) {
+      console.error("Error updating todo: ", error);
+    }
+  };
+
+  // Fetch todos when the component mounts
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   return (
     <DataContext.Provider value={{ todos, addItem, deleteItem, updateItem }}>
       {children}
