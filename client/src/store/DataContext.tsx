@@ -30,9 +30,7 @@ const reducer = (state: Todo[], action: Action) => {
       return state.filter((todo) => todo._id !== action.payload);
     case "update":
       return state.map((todo) =>
-        todo._id === action.payload._id
-          ? { ...todo, todo: action.payload.todo }
-          : todo
+        todo._id === action.payload._id ? { ...todo, ...action.payload } : todo
       );
     case "initial":
       return action.payload;
@@ -46,7 +44,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [todos, dispatch] = useReducer(reducer, []);
 
-  const apiUrl = import.meta.env.VITE_SERVER_API_URL;;
+  const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
   // Fetch todos from the API
   const fetchTodos = async () => {
@@ -79,31 +77,37 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
   // Delete a todo
   const deleteItem = async (id: string) => {
+    const prevState = todos; // Save previous state in case of failure
+    dispatch({ type: "delete", payload: id }); // Optimistically remove the todo
+
     try {
       await fetch(`${apiUrl}/todos/${id}`, {
         method: "DELETE",
       });
-      dispatch({ type: "delete", payload: id }); // Update the state to remove the deleted todo
     } catch (error) {
       console.error("Error deleting todo: ", error);
+      // Revert to previous state if the request fails
+      dispatch({ type: "initial", payload: prevState });
     }
   };
 
   // Update an existing todo
   const updateItem = async (todo: Todo) => {
+    const prevState = todos; // Save previous state in case of failure
+    dispatch({ type: "update", payload: todo }); // Update the UI first
+
     try {
-      const response = await fetch(`${apiUrl}/todos/${todo._id}`, {
+      await fetch(`${apiUrl}/todos/${todo._id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ todo: todo.todo }), // Send the updated todo content
       });
-
-      const updatedTodo = await response.json();
-      dispatch({ type: "update", payload: updatedTodo });
     } catch (error) {
       console.error("Error updating todo: ", error);
+      // Revert to previous state if the request fails
+      dispatch({ type: "initial", payload: prevState });
     }
   };
 
