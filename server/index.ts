@@ -35,6 +35,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
+
+// Default data for home path
+app.get("/", async (req: Request, res: Response) => {
+  res.status(200).send("Welcome to the Task Book API");
+});
+
 // GET all todos
 app.get("/todos", async (req: Request, res: Response) => {
   try {
