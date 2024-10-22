@@ -3,13 +3,16 @@ import { Error } from "mongoose";
 const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
+import dotenv from "dotenv";
 
 const app = express();
 const PORT = 3000;
 
+dotenv.config();
+
 // Connect MongoDB
 mongoose
-  .connect("mongodb://127.0.0.1:27017/todo_app")
+  .connect(process.env.MONGO_URI as string)
   .then(() => console.log("MongoDB Connected"))
   .catch((err: Error) => console.log("Mongo Error", err));
 
@@ -117,6 +120,8 @@ app
   });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on http://localhost:${PORT}`);
+// });
+
+export default app;
