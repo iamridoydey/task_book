@@ -34,7 +34,7 @@ const TodoItem: React.FC<Todo> = ({ _id, todo }) => {
       {isEditable ? (
         <input
           onChange={handleOnChange}
-          className={`rounded outline-none text-green font-bold text-xl hover:outline-green-500`}
+          className={`w-[200px] esm:w-[350px] sm:w-[70%] rounded outline-none text-green font-bold text-xl hover:outline-green-500`}
           value={editValue}
           type="text"
           autoFocus
@@ -44,7 +44,7 @@ const TodoItem: React.FC<Todo> = ({ _id, todo }) => {
       ) : (
         <h4 className={`font-bold text-xl`}>{todo}</h4>
       )}
-      <div className={`flex flex-row gap-2 text-2xl`}>
+      <div className={`flex flex-row gap-2 text-xl sm:text-2xl`}>
         <span
           onClick={() => setIsEditable((prev) => !prev)}
           className={`cursor-pointer`}
